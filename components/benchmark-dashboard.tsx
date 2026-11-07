@@ -435,68 +435,62 @@ export function BenchmarkDashboard() {
             evaluation={evaluation}
             isEvaluating={isEvaluating}
             evaluationError={evaluationError}
+            telemetry={
+              benchmarkReady ? (
+                <>
+                  <ChartPanel title="Latency Profile" icon={Clock3}>
+                    <ResponsiveContainer width="100%" height={260}>
+                      <BarChart data={chartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                        <CartesianGrid stroke="rgba(148,163,184,0.1)" vertical={false} />
+                        <XAxis dataKey="name" stroke="#94A3B8" tickLine={false} axisLine={false} tickMargin={10} />
+                        <YAxis stroke="#64748B" tickLine={false} axisLine={false} width={42} />
+                        <Tooltip content={<ChartTooltip suffix="ms" />} cursor={{ fill: "rgba(59,130,246,0.08)" }} />
+                        <Bar dataKey="latency" radius={[6, 6, 2, 2]} maxBarSize={54}>
+                          {chartData.map((entry) => (
+                            <Cell key={entry.id} fill={entry.color} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartPanel>
+
+                  <ChartPanel title="Token Mix" icon={BarChart3}>
+                    <ResponsiveContainer width="100%" height={260}>
+                      <BarChart data={chartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                        <CartesianGrid stroke="rgba(148,163,184,0.1)" vertical={false} />
+                        <XAxis dataKey="name" stroke="#94A3B8" tickLine={false} axisLine={false} tickMargin={10} />
+                        <YAxis stroke="#64748B" tickLine={false} axisLine={false} width={42} />
+                        <Tooltip content={<ChartTooltip suffix=" tokens" />} cursor={{ fill: "rgba(59,130,246,0.08)" }} />
+                        <Bar dataKey="input" stackId="tokens" fill="#60A5FA" radius={[0, 0, 2, 2]} maxBarSize={54} />
+                        <Bar dataKey="output" stackId="tokens" fill="#34D399" radius={[6, 6, 0, 0]} maxBarSize={54} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </ChartPanel>
+
+                  <ChartPanel title="Cost Curve" icon={Activity}>
+                    <ResponsiveContainer width="100%" height={260}>
+                      <LineChart data={chartData} margin={{ top: 8, right: 14, left: -18, bottom: 0 }}>
+                        <CartesianGrid stroke="rgba(148,163,184,0.1)" vertical={false} />
+                        <XAxis dataKey="name" stroke="#94A3B8" tickLine={false} axisLine={false} tickMargin={10} />
+                        <YAxis stroke="#64748B" tickLine={false} axisLine={false} width={42} />
+                        <Tooltip content={<ChartTooltip prefix="$" suffix="/1K" />} />
+                        <Line
+                          type="monotone"
+                          dataKey="cost"
+                          stroke="#60A5FA"
+                          strokeWidth={3}
+                          dot={{ r: 4, fill: "#050816", stroke: "#60A5FA", strokeWidth: 2 }}
+                          activeDot={{ r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </ChartPanel>
+                </>
+              ) : null
+            }
           />
         )}
 
-        {benchmarkReady && (
-          <section className="grid gap-5 lg:grid-cols-3 lg:gap-6">
-            <ChartPanel
-              title="Latency Profile"
-              icon={Clock3}
-              className="lg:col-span-1"
-            >
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={chartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-                  <CartesianGrid stroke="rgba(148,163,184,0.1)" vertical={false} />
-                  <XAxis dataKey="name" stroke="#94A3B8" tickLine={false} axisLine={false} tickMargin={10} />
-                  <YAxis stroke="#64748B" tickLine={false} axisLine={false} width={42} />
-                  <Tooltip content={<ChartTooltip suffix="ms" />} cursor={{ fill: "rgba(59,130,246,0.08)" }} />
-                  <Bar dataKey="latency" radius={[6, 6, 2, 2]} maxBarSize={54}>
-                    {chartData.map((entry) => (
-                      <Cell key={entry.id} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartPanel>
-
-            <ChartPanel title="Token Mix" icon={BarChart3} className="lg:col-span-1">
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={chartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-                  <CartesianGrid stroke="rgba(148,163,184,0.1)" vertical={false} />
-                  <XAxis dataKey="name" stroke="#94A3B8" tickLine={false} axisLine={false} tickMargin={10} />
-                  <YAxis stroke="#64748B" tickLine={false} axisLine={false} width={42} />
-                  <Tooltip content={<ChartTooltip suffix=" tokens" />} cursor={{ fill: "rgba(59,130,246,0.08)" }} />
-                  <Bar dataKey="input" stackId="tokens" fill="#60A5FA" radius={[0, 0, 2, 2]} maxBarSize={54} />
-                  <Bar dataKey="output" stackId="tokens" fill="#34D399" radius={[6, 6, 0, 0]} maxBarSize={54} />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartPanel>
-
-            <ChartPanel
-              title="Cost Curve"
-              icon={Activity}
-              className="lg:col-span-1"
-            >
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={chartData} margin={{ top: 8, right: 14, left: -18, bottom: 0 }}>
-                  <CartesianGrid stroke="rgba(148,163,184,0.1)" vertical={false} />
-                  <XAxis dataKey="name" stroke="#94A3B8" tickLine={false} axisLine={false} tickMargin={10} />
-                  <YAxis stroke="#64748B" tickLine={false} axisLine={false} width={42} />
-                  <Tooltip content={<ChartTooltip prefix="$" suffix="/1K" />} />
-                  <Line
-                    type="monotone"
-                    dataKey="cost"
-                    stroke="#60A5FA"
-                    strokeWidth={3}
-                    dot={{ r: 4, fill: "#050816", stroke: "#60A5FA", strokeWidth: 2 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartPanel>
-          </section>
-        )}
       </div>
     </main>
   );
@@ -2083,11 +2077,13 @@ function ModelResultCard({
 function EvaluationSection({
   evaluation,
   isEvaluating,
-  evaluationError
+  evaluationError,
+  telemetry
 }: {
   evaluation: EvaluationResponse | null;
   isEvaluating: boolean;
   evaluationError: string | null;
+  telemetry?: ReactNode;
 }) {
   const [expandedReports, setExpandedReports] = useState<Record<string, boolean>>({});
   const radarData = useMemo(() => {
@@ -2155,52 +2151,55 @@ function EvaluationSection({
   }
 
   return (
-    <section className="grid gap-5 xl:grid-cols-[0.92fr_1.08fr] xl:gap-6">
-      <ChartPanel title="GPT-4o Judge Radar" icon={BrainCircuit}>
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <p className="text-sm text-slate-400">
-            {isEvaluating
-              ? "Scoring completed outputs"
-              : evaluation
-                ? `Rubric normalized by ${evaluation.judgeModel}`
-                : "Awaiting model outputs"}
-          </p>
-          {isEvaluating && <Loader2 className="h-4 w-4 animate-spin text-accent" />}
-        </div>
-        {evaluationError && (
-          <div className="mb-4 rounded-md border border-rose-400/20 bg-rose-400/10 px-3 py-2 text-sm text-rose-200">
-            {evaluationError}
+    <section className="grid items-start gap-5 xl:grid-cols-[0.92fr_1.08fr] xl:gap-6">
+      <div className="flex flex-col gap-5 xl:gap-6">
+        <ChartPanel title="GPT-4o Judge Radar" icon={BrainCircuit}>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <p className="text-sm text-slate-400">
+              {isEvaluating
+                ? "Scoring completed outputs"
+                : evaluation
+                  ? `Rubric normalized by ${evaluation.judgeModel}`
+                  : "Awaiting model outputs"}
+            </p>
+            {isEvaluating && <Loader2 className="h-4 w-4 animate-spin text-accent" />}
           </div>
-        )}
-        <ResponsiveContainer width="100%" height={300}>
-          <RadarChart data={radarData}>
-            <PolarGrid stroke="rgba(148,163,184,0.16)" />
-            <PolarAngleAxis dataKey="metric" tick={{ fill: "#CBD5E1", fontSize: 12 }} />
-            <PolarRadiusAxis
-              angle={90}
-              domain={[0, 100]}
-              tick={{ fill: "#64748B", fontSize: 10 }}
-              tickCount={5}
-            />
-            {evaluation?.evaluations.map((item) => {
-              const name = compactModelName(item.label);
-              const color = getModelColor(item.modelId);
+          {evaluationError && (
+            <div className="mb-4 rounded-md border border-rose-400/20 bg-rose-400/10 px-3 py-2 text-sm text-rose-200">
+              {evaluationError}
+            </div>
+          )}
+          <ResponsiveContainer width="100%" height={300}>
+            <RadarChart data={radarData}>
+              <PolarGrid stroke="rgba(148,163,184,0.16)" />
+              <PolarAngleAxis dataKey="metric" tick={{ fill: "#CBD5E1", fontSize: 12 }} />
+              <PolarRadiusAxis
+                angle={90}
+                domain={[0, 100]}
+                tick={{ fill: "#64748B", fontSize: 10 }}
+                tickCount={5}
+              />
+              {evaluation?.evaluations.map((item) => {
+                const name = compactModelName(item.label);
+                const color = getModelColor(item.modelId);
 
-              return (
-                <Radar
-                  key={item.modelId}
-                  dataKey={name}
-                  stroke={color}
-                  fill={color}
-                  fillOpacity={0.12}
-                  strokeWidth={2}
-                />
-              );
-            })}
-            <Tooltip content={<ChartTooltip suffix="/100" />} />
-          </RadarChart>
-        </ResponsiveContainer>
-      </ChartPanel>
+                return (
+                  <Radar
+                    key={item.modelId}
+                    dataKey={name}
+                    stroke={color}
+                    fill={color}
+                    fillOpacity={0.12}
+                    strokeWidth={2}
+                  />
+                );
+              })}
+              <Tooltip content={<ChartTooltip suffix="/100" />} />
+            </RadarChart>
+          </ResponsiveContainer>
+        </ChartPanel>
+        {telemetry}
+      </div>
 
       <section className="glass-panel rounded-md p-4 shadow-inner-line sm:p-5">
         <div className="mb-5 flex items-center justify-between">
