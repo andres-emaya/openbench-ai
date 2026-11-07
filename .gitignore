@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# environment variables (API keys never go to GitHub)
+.env
+.env*.local
+
+# logs and caches
+*.log
+*.tsbuildinfo
+.DS_Store

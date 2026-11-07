@@ -1,0 +1,1818 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenBench AI Presentation Deck</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #050816;
+        --panel: rgba(15, 23, 42, 0.78);
+        --panel-2: rgba(2, 6, 23, 0.68);
+        --line: rgba(148, 163, 184, 0.24);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --blue: #60a5fa;
+        --cyan: #22d3ee;
+        --green: #34d399;
+        --yellow: #facc15;
+        --rose: #fb7185;
+        --violet: #a78bfa;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 15% 18%, rgba(34, 211, 238, 0.18), transparent 26%),
+          radial-gradient(circle at 85% 72%, rgba(250, 204, 21, 0.12), transparent 28%),
+          linear-gradient(180deg, #050816 0%, #070b19 55%, #030712 100%);
+        color: var(--text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        overflow: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+        background-size: 44px 44px;
+        mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 86%, transparent);
+      }
+
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(120deg, transparent 0%, rgba(34, 211, 238, 0.08) 42%, transparent 52%),
+          radial-gradient(circle at 50% 50%, transparent 0 55%, rgba(2, 6, 23, 0.42) 100%);
+        mix-blend-mode: screen;
+        animation: aurora-sweep 12s ease-in-out infinite alternate;
+      }
+
+      #llm-bg {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        opacity: 0.86;
+      }
+
+      .ambient-token {
+        position: fixed;
+        z-index: 1;
+        border: 1px solid rgba(96, 165, 250, 0.22);
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.38);
+        color: rgba(219, 234, 254, 0.48);
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 12px;
+        padding: 8px 11px;
+        pointer-events: none;
+        box-shadow: 0 0 34px rgba(34, 211, 238, 0.08);
+        animation: token-float 16s linear infinite;
+      }
+
+      .ambient-token:nth-of-type(1) {
+        left: 6vw;
+        top: 22vh;
+        animation-delay: -2s;
+      }
+
+      .ambient-token:nth-of-type(2) {
+        left: 76vw;
+        top: 16vh;
+        animation-delay: -6s;
+      }
+
+      .ambient-token:nth-of-type(3) {
+        left: 68vw;
+        top: 76vh;
+        animation-delay: -10s;
+      }
+
+      .ambient-token:nth-of-type(4) {
+        left: 12vw;
+        top: 72vh;
+        animation-delay: -14s;
+      }
+
+      .deck {
+        position: relative;
+        z-index: 2;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: none;
+        padding: clamp(28px, 5vw, 76px);
+      }
+
+      .slide.active {
+        display: grid;
+        animation: enter 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .slide.exit-left {
+        animation: exit-left 220ms ease-in both;
+      }
+
+      .slide.exit-right {
+        animation: exit-right 220ms ease-in both;
+      }
+
+      .slide-inner {
+        position: relative;
+        width: min(1180px, 100%);
+        height: min(680px, 100%);
+        margin: auto;
+        display: grid;
+        gap: 28px;
+        align-content: center;
+      }
+
+      .topline {
+        color: var(--cyan);
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        max-width: 920px;
+        font-size: clamp(48px, 7vw, 94px);
+        line-height: 0.94;
+        letter-spacing: 0;
+        background: linear-gradient(92deg, #ffffff 0%, #bfdbfe 36%, #67e8f9 64%, #fde68a 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-shadow: 0 0 48px rgba(96, 165, 250, 0.24);
+      }
+
+      h2 {
+        max-width: 900px;
+        font-size: clamp(38px, 5vw, 68px);
+        line-height: 1;
+        letter-spacing: 0;
+        text-wrap: balance;
+      }
+
+      h3 {
+        font-size: 22px;
+        line-height: 1.2;
+      }
+
+      .lead {
+        max-width: 850px;
+        color: #cbd5e1;
+        font-size: clamp(20px, 2.3vw, 30px);
+        line-height: 1.42;
+      }
+
+      .small {
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .card,
+      .metric,
+      .code-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.026)),
+          var(--panel);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+        backdrop-filter: blur(18px);
+        transition:
+          transform 200ms ease,
+          border-color 200ms ease,
+          box-shadow 200ms ease,
+          background 200ms ease;
+      }
+
+      .card:hover,
+      .metric:hover,
+      .code-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(96, 165, 250, 0.55);
+        box-shadow: 0 34px 90px rgba(0, 0, 0, 0.42), 0 0 44px rgba(34, 211, 238, 0.12);
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      .metric {
+        padding: 20px;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 8px;
+        color: white;
+        font-size: clamp(26px, 3.5vw, 44px);
+        line-height: 1;
+      }
+
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .pill {
+        border: 1px solid rgba(96, 165, 250, 0.3);
+        border-radius: 999px;
+        background: rgba(96, 165, 250, 0.11);
+        color: #dbeafe;
+        padding: 9px 13px;
+        font-size: 14px;
+        font-weight: 700;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .step {
+        position: relative;
+        min-height: 148px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-2);
+        padding: 18px;
+      }
+
+      .step b {
+        display: block;
+        margin-bottom: 12px;
+        color: white;
+      }
+
+      .step span {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .step::after {
+        content: ">";
+        position: absolute;
+        top: 50%;
+        right: -12px;
+        transform: translateY(-50%);
+        color: var(--cyan);
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-weight: 900;
+      }
+
+      .step:last-child::after {
+        content: "";
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 1.02fr 0.98fr;
+        gap: 28px;
+        align-items: center;
+      }
+
+      .mock-ui {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(2, 6, 23, 0.86);
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
+      }
+
+      .mock-bar {
+        display: flex;
+        gap: 7px;
+        padding: 14px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--rose);
+      }
+
+      .dot:nth-child(2) {
+        background: var(--yellow);
+      }
+
+      .dot:nth-child(3) {
+        background: var(--green);
+      }
+
+      .mock-content {
+        padding: 20px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .mock-line {
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.22);
+      }
+
+      .mock-line.hot {
+        background: linear-gradient(90deg, var(--cyan), var(--blue));
+      }
+
+      .bars {
+        display: grid;
+        gap: 12px;
+      }
+
+      .bar {
+        height: 28px;
+        border-radius: 6px;
+        background: rgba(148, 163, 184, 0.16);
+        overflow: hidden;
+      }
+
+      .bar span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--blue), var(--green));
+        animation: bar-pulse 2.6s ease-in-out infinite;
+      }
+
+      .neural-core {
+        position: relative;
+        width: min(430px, 100%);
+        aspect-ratio: 1;
+        margin: auto;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle, rgba(255, 255, 255, 0.16) 0 5%, transparent 6%),
+          conic-gradient(from 0deg, rgba(34, 211, 238, 0.16), rgba(167, 139, 250, 0.22), rgba(250, 204, 21, 0.16), rgba(34, 211, 238, 0.16));
+        box-shadow:
+          inset 0 0 80px rgba(96, 165, 250, 0.22),
+          0 0 110px rgba(34, 211, 238, 0.18);
+        animation: slow-spin 18s linear infinite;
+      }
+
+      .neural-core::before,
+      .neural-core::after {
+        content: "";
+        position: absolute;
+        inset: 12%;
+        border: 1px solid rgba(125, 211, 252, 0.36);
+        border-radius: 42% 58% 48% 52%;
+        animation: slow-spin 9s linear infinite reverse;
+      }
+
+      .neural-core::after {
+        inset: 24%;
+        border-color: rgba(250, 204, 21, 0.34);
+        animation-duration: 7s;
+        animation-direction: normal;
+      }
+
+      .simulator {
+        display: grid;
+        gap: 16px;
+      }
+
+      .sim-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .sim-button.active {
+        border-color: rgba(34, 211, 238, 0.75);
+        background: rgba(34, 211, 238, 0.16);
+        box-shadow: 0 0 28px rgba(34, 211, 238, 0.16);
+      }
+
+      .leaderboard {
+        display: grid;
+        gap: 10px;
+      }
+
+      .leader-row {
+        display: grid;
+        grid-template-columns: 110px 1fr 58px;
+        gap: 12px;
+        align-items: center;
+        color: #cbd5e1;
+        font-size: 14px;
+      }
+
+      .leader-track {
+        height: 12px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.14);
+      }
+
+      .leader-track span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--cyan), var(--violet), var(--yellow));
+        transition: width 540ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .sim-output {
+        min-height: 72px;
+        border: 1px solid rgba(34, 211, 238, 0.2);
+        border-radius: 8px;
+        background: rgba(2, 6, 23, 0.56);
+        color: #dbeafe;
+        padding: 14px;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .thesis-band {
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .quote-panel {
+        border: 1px solid rgba(250, 204, 21, 0.28);
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(250, 204, 21, 0.12), transparent 45%),
+          rgba(2, 6, 23, 0.66);
+        padding: 28px;
+        box-shadow: 0 0 80px rgba(250, 204, 21, 0.08);
+      }
+
+      .quote-panel strong {
+        display: block;
+        color: white;
+        font-size: clamp(28px, 3.2vw, 48px);
+        line-height: 1.05;
+      }
+
+      .llm-lab {
+        display: grid;
+        gap: 18px;
+      }
+
+      .token-tunnel {
+        position: relative;
+        min-height: 120px;
+        overflow: hidden;
+        border: 1px solid rgba(34, 211, 238, 0.22);
+        border-radius: 8px;
+        background:
+          linear-gradient(90deg, rgba(34, 211, 238, 0.08), transparent 38%, rgba(167, 139, 250, 0.1)),
+          rgba(2, 6, 23, 0.58);
+      }
+
+      .moving-token {
+        position: absolute;
+        top: 50%;
+        left: -90px;
+        transform: translateY(-50%);
+        border: 1px solid rgba(125, 211, 252, 0.32);
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.82);
+        color: #e0f2fe;
+        padding: 8px 12px;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 13px;
+        animation: token-run 5.4s linear infinite;
+      }
+
+      .moving-token:nth-child(2) {
+        top: 28%;
+        animation-delay: -1.2s;
+      }
+
+      .moving-token:nth-child(3) {
+        top: 72%;
+        animation-delay: -2.4s;
+      }
+
+      .moving-token:nth-child(4) {
+        top: 48%;
+        animation-delay: -3.6s;
+      }
+
+      .layer-stack {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+      }
+
+      .layer {
+        position: relative;
+        min-height: 132px;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.64);
+        padding: 14px;
+      }
+
+      .layer::before {
+        content: "";
+        position: absolute;
+        inset: auto 12px 12px 12px;
+        height: 42%;
+        border-radius: 6px;
+        background: linear-gradient(180deg, rgba(34, 211, 238, 0.42), rgba(96, 165, 250, 0.08));
+        transform: scaleY(var(--pulse, 0.45));
+        transform-origin: bottom;
+        animation: layer-think 2.4s ease-in-out infinite;
+      }
+
+      .layer:nth-child(2)::before {
+        animation-delay: -0.4s;
+      }
+
+      .layer:nth-child(3)::before {
+        animation-delay: -0.8s;
+      }
+
+      .layer:nth-child(4)::before {
+        animation-delay: -1.2s;
+      }
+
+      .layer:nth-child(5)::before {
+        animation-delay: -1.6s;
+      }
+
+      .layer b,
+      .layer span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .layer b {
+        display: block;
+        color: white;
+        font-size: 14px;
+      }
+
+      .layer span {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .stage-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .stage-button.active {
+        border-color: rgba(250, 204, 21, 0.78);
+        background: rgba(250, 204, 21, 0.13);
+      }
+
+      .stage-explain {
+        min-height: 86px;
+        border: 1px solid rgba(167, 139, 250, 0.24);
+        border-radius: 8px;
+        background: rgba(2, 6, 23, 0.56);
+        padding: 16px;
+        color: #ddd6fe;
+        font-size: 16px;
+        line-height: 1.65;
+      }
+
+      .market-map {
+        position: relative;
+        min-height: 420px;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 8px;
+        background:
+          radial-gradient(circle at 50% 48%, rgba(34, 211, 238, 0.12), transparent 28%),
+          rgba(2, 6, 23, 0.62);
+      }
+
+      .market-node {
+        position: absolute;
+        width: 132px;
+        height: 132px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgba(125, 211, 252, 0.34);
+        border-radius: 50%;
+        background: rgba(15, 23, 42, 0.84);
+        color: white;
+        text-align: center;
+        font-weight: 800;
+        box-shadow: 0 0 50px rgba(34, 211, 238, 0.13);
+        animation: node-breathe 4s ease-in-out infinite;
+      }
+
+      .market-node.closed {
+        width: 172px;
+        height: 172px;
+        border-color: rgba(250, 204, 21, 0.48);
+        background:
+          radial-gradient(circle, rgba(250, 204, 21, 0.16), transparent 70%),
+          rgba(15, 23, 42, 0.9);
+        box-shadow: 0 0 70px rgba(250, 204, 21, 0.16);
+      }
+
+      .market-node.open {
+        border-color: rgba(52, 211, 153, 0.42);
+        box-shadow: 0 0 54px rgba(52, 211, 153, 0.13);
+      }
+
+      .market-node:nth-child(1) {
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .market-node:nth-child(2) {
+        left: 8%;
+        top: 12%;
+      }
+
+      .market-node:nth-child(3) {
+        right: 10%;
+        top: 10%;
+      }
+
+      .market-node:nth-child(4) {
+        left: 12%;
+        bottom: 10%;
+      }
+
+      .market-node:nth-child(5) {
+        right: 12%;
+        bottom: 12%;
+      }
+
+      .market-line {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 42%;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(250, 204, 21, 0.6), transparent);
+        transform-origin: left center;
+        opacity: 0.42;
+      }
+
+      .market-line:nth-of-type(1) {
+        transform: rotate(32deg);
+      }
+
+      .market-line:nth-of-type(2) {
+        transform: rotate(142deg);
+      }
+
+      .market-line:nth-of-type(3) {
+        transform: rotate(218deg);
+      }
+
+      .market-line:nth-of-type(4) {
+        transform: rotate(326deg);
+      }
+
+      .compare-table {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+
+      .compare-card {
+        border-radius: 8px;
+        padding: 24px;
+      }
+
+      .compare-card.open-side {
+        border: 1px solid rgba(52, 211, 153, 0.34);
+        background: linear-gradient(180deg, rgba(52, 211, 153, 0.12), rgba(2, 6, 23, 0.64));
+      }
+
+      .compare-card.closed-side {
+        border: 1px solid rgba(250, 204, 21, 0.34);
+        background: linear-gradient(180deg, rgba(250, 204, 21, 0.12), rgba(2, 6, 23, 0.64));
+      }
+
+      .axis {
+        display: grid;
+        gap: 12px;
+      }
+
+      .axis-row {
+        display: grid;
+        grid-template-columns: 120px 1fr 1fr;
+        gap: 10px;
+        align-items: center;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 8px;
+        background: rgba(2, 6, 23, 0.42);
+        padding: 12px;
+        color: #cbd5e1;
+        font-size: 14px;
+      }
+
+      .axis-row b {
+        color: white;
+      }
+
+      .code-card {
+        padding: 20px;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        color: #bfdbfe;
+        font-size: 15px;
+        line-height: 1.75;
+      }
+
+      .accent {
+        color: var(--cyan);
+      }
+
+      .green {
+        color: var(--green);
+      }
+
+      .yellow {
+        color: var(--yellow);
+      }
+
+      .rose {
+        color: var(--rose);
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #cbd5e1;
+        font-size: 19px;
+        line-height: 1.6;
+      }
+
+      li + li {
+        margin-top: 10px;
+      }
+
+      .footer {
+        position: fixed;
+        left: 28px;
+        right: 28px;
+        bottom: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #64748b;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 12px;
+        pointer-events: none;
+        z-index: 5;
+      }
+
+      .progress {
+        position: fixed;
+        left: 24px;
+        right: 24px;
+        bottom: 46px;
+        z-index: 5;
+        height: 3px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.16);
+      }
+
+      .progress span {
+        display: block;
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--cyan), var(--violet), var(--yellow));
+        box-shadow: 0 0 22px rgba(34, 211, 238, 0.8);
+        transition: width 280ms ease;
+      }
+
+      .controls {
+        position: fixed;
+        right: 24px;
+        top: 20px;
+        display: flex;
+        gap: 8px;
+        z-index: 20;
+      }
+
+      .back-link {
+        position: fixed;
+        left: 24px;
+        top: 20px;
+        z-index: 20;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(34, 211, 238, 0.34);
+        border-radius: 8px;
+        background: rgba(2, 6, 23, 0.62);
+        color: #dbeafe;
+        padding: 9px 12px;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+        transition:
+          transform 160ms ease,
+          border-color 160ms ease,
+          background 160ms ease;
+      }
+
+      .back-link:hover {
+        transform: translateY(-1px);
+        border-color: rgba(34, 211, 238, 0.8);
+        background: rgba(14, 165, 233, 0.14);
+      }
+
+      button {
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.7);
+        color: white;
+        cursor: pointer;
+        padding: 9px 12px;
+        font: inherit;
+        backdrop-filter: blur(16px);
+        transition:
+          transform 160ms ease,
+          border-color 160ms ease,
+          background 160ms ease;
+      }
+
+      button:hover {
+        border-color: rgba(96, 165, 250, 0.7);
+        background: rgba(30, 41, 59, 0.9);
+        transform: translateY(-1px);
+      }
+
+      .hint {
+        position: fixed;
+        left: 50%;
+        top: 20px;
+        z-index: 5;
+        transform: translateX(-50%);
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 999px;
+        background: rgba(2, 6, 23, 0.48);
+        color: rgba(226, 232, 240, 0.72);
+        padding: 9px 14px;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 12px;
+        backdrop-filter: blur(16px);
+      }
+
+      .notes {
+        display: none;
+      }
+
+      @media print {
+        body {
+          overflow: visible;
+          background: #050816;
+        }
+
+        .deck {
+          height: auto;
+        }
+
+        .slide {
+          position: relative;
+          display: grid !important;
+          width: 100vw;
+          height: 100vh;
+          page-break-after: always;
+        }
+
+        .controls,
+        .back-link,
+        .footer,
+        .progress,
+        .hint,
+        #llm-bg,
+        .ambient-token {
+          display: none;
+        }
+      }
+
+      @media (max-width: 900px) {
+        body {
+          overflow: auto;
+        }
+
+        .deck {
+          height: auto;
+        }
+
+        .slide,
+        .slide.active {
+          position: relative;
+          display: grid;
+          min-height: 100vh;
+        }
+
+        .grid-2,
+        .grid-3,
+        .grid-4,
+        .split,
+        .flow,
+        .thesis-band,
+        .compare-table,
+        .axis-row {
+          grid-template-columns: 1fr;
+        }
+
+        .slide-inner {
+          height: auto;
+        }
+
+        .layer-stack {
+          grid-template-columns: 1fr;
+        }
+
+        .market-map {
+          min-height: 520px;
+        }
+
+        .step::after {
+          display: none;
+        }
+      }
+
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(22px) scale(0.985);
+          filter: blur(8px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+          filter: blur(0);
+        }
+      }
+
+      @keyframes exit-left {
+        to {
+          opacity: 0;
+          transform: translateX(-24px) scale(0.99);
+          filter: blur(6px);
+        }
+      }
+
+      @keyframes exit-right {
+        to {
+          opacity: 0;
+          transform: translateX(24px) scale(0.99);
+          filter: blur(6px);
+        }
+      }
+
+      @keyframes aurora-sweep {
+        from {
+          transform: translateX(-8%) rotate(0deg);
+          opacity: 0.58;
+        }
+
+        to {
+          transform: translateX(8%) rotate(2deg);
+          opacity: 0.95;
+        }
+      }
+
+      @keyframes token-float {
+        0% {
+          transform: translate3d(0, 0, 0);
+          opacity: 0.18;
+        }
+
+        50% {
+          transform: translate3d(34px, -42px, 0);
+          opacity: 0.62;
+        }
+
+        100% {
+          transform: translate3d(0, 0, 0);
+          opacity: 0.18;
+        }
+      }
+
+      @keyframes slow-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes bar-pulse {
+        0%,
+        100% {
+          filter: saturate(1);
+        }
+
+        50% {
+          filter: saturate(1.7) brightness(1.18);
+        }
+      }
+
+      @keyframes token-run {
+        from {
+          left: -110px;
+          opacity: 0;
+        }
+
+        12%,
+        88% {
+          opacity: 1;
+        }
+
+        to {
+          left: calc(100% + 40px);
+          opacity: 0;
+        }
+      }
+
+      @keyframes layer-think {
+        0%,
+        100% {
+          transform: scaleY(0.3);
+          opacity: 0.55;
+        }
+
+        50% {
+          transform: scaleY(0.98);
+          opacity: 0.95;
+        }
+      }
+
+      @keyframes node-breathe {
+        0%,
+        100% {
+          filter: brightness(0.9);
+        }
+
+        50% {
+          filter: brightness(1.18);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="llm-bg" aria-hidden="true"></canvas>
+    <span class="ambient-token">tokens/sec</span>
+    <span class="ambient-token">judge_score</span>
+    <span class="ambient-token">latency_ms</span>
+    <span class="ambient-token">cost_curve</span>
+    <a class="back-link" href="/" target="_parent" aria-label="Return to OpenBench dashboard">
+      &lt; Back to app
+    </a>
+    <div class="hint">Arrow keys or space to present</div>
+    <div class="controls" aria-label="Slide controls">
+      <button type="button" id="prev">Prev</button>
+      <button type="button" id="next">Next</button>
+    </div>
+
+    <main class="deck">
+      <section class="slide active" data-title="Title">
+        <div class="slide-inner split">
+          <div>
+            <p class="topline">Final Project Presentation | Open vs Closed Models</p>
+            <h1>OpenBench AI</h1>
+            <p class="lead">
+              A model comparison website built to answer a bigger question:
+              when AI is controlled by a few powerful companies, how do we
+              evaluate open and closed models fairly?
+            </p>
+            <div class="pill-row">
+              <span class="pill">Next.js 15</span>
+              <span class="pill">Server-Sent Events</span>
+              <span class="pill">Multi-provider APIs</span>
+              <span class="pill">LLM-as-judge</span>
+            </div>
+          </div>
+          <div class="neural-core" aria-hidden="true"></div>
+        </div>
+        <aside class="notes">
+          Open with the practical question: when several LLMs can answer the
+          same prompt, how do we choose the best one for a real product?
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Professor Lens">
+        <div class="slide-inner">
+          <p class="topline">The Course Question</p>
+          <h2>Open models challenge monopoly. Closed models concentrate power.</h2>
+          <div class="thesis-band">
+            <div class="quote-panel">
+              <strong>My project is not only a benchmark. It is a transparency tool.</strong>
+              <p class="small" style="margin-top: 18px">
+                OpenBench AI compares model behavior, cost, speed, safety, and
+                quality so users are not forced to trust brand reputation alone.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Presentation thesis</h3>
+              <ul>
+                <li>Closed models often have stronger infrastructure, polish, and reliability.</li>
+                <li>Open models create competition, auditability, customization, and independence.</li>
+                <li>The risk is monopoly: if a few closed providers dominate, access, pricing, and rules become centralized.</li>
+                <li>OpenBench AI shows a practical way to compare models instead of accepting one winner by default.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Problem">
+        <div class="slide-inner">
+          <p class="topline">The Problem</p>
+          <h2>Model choice is technical, economic, and political.</h2>
+          <div class="grid-3">
+            <div class="card">
+              <h3>Quality is hard to see</h3>
+              <p class="small">A polished answer can still be incomplete, unsafe, biased, or wrong.</p>
+            </div>
+            <div class="card">
+              <h3>Power is concentrated</h3>
+              <p class="small">Closed providers can control pricing, access, moderation rules, and model behavior.</p>
+            </div>
+            <div class="card">
+              <h3>Open models need proof</h3>
+              <p class="small">Open alternatives are valuable, but users need evidence that they are good enough for the job.</p>
+            </div>
+          </div>
+          <p class="lead">OpenBench AI turns the open-vs-closed debate from opinion into measurable comparison.</p>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Solution">
+        <div class="slide-inner split">
+          <div>
+            <p class="topline">The Solution</p>
+            <h2>One prompt. Multiple models. A ranked decision brief.</h2>
+            <p class="lead">
+              The dashboard runs the same prompt across GPT-4o, Claude Sonnet,
+              DeepSeek, and Mistral, streams each answer live, then evaluates
+              the results with both telemetry and rubric-based judging.
+            </p>
+          </div>
+          <div class="mock-ui" aria-label="Dashboard mockup">
+            <div class="mock-bar">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <div class="mock-content">
+              <div class="mock-line hot" style="width: 82%"></div>
+              <div class="grid-2">
+                <div class="metric"><span class="small">Fastest</span><strong>GPT-4o</strong></div>
+                <div class="metric"><span class="small">Cheapest</span><strong>Mistral</strong></div>
+              </div>
+              <div class="bars">
+                <div class="bar"><span style="width: 94%"></span></div>
+                <div class="bar"><span style="width: 82%"></span></div>
+                <div class="bar"><span style="width: 68%"></span></div>
+                <div class="bar"><span style="width: 74%"></span></div>
+              </div>
+              <div class="mock-line" style="width: 96%"></div>
+              <div class="mock-line" style="width: 74%"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Interactive Mini Demo">
+        <div class="slide-inner split">
+          <div>
+            <p class="topline">Interactive Mini Demo</p>
+            <h2>Change the task and watch the winner move.</h2>
+            <p class="lead">
+              This slide mirrors the core idea of OpenBench: the best model is
+              contextual. A reasoning task, a low-cost task, and a safety task
+              can produce different winners.
+            </p>
+          </div>
+          <div class="card simulator">
+            <div class="sim-controls" aria-label="Benchmark scenario controls">
+              <button class="sim-button active" type="button" data-scenario="reasoning">Reasoning</button>
+              <button class="sim-button" type="button" data-scenario="speed">Speed</button>
+              <button class="sim-button" type="button" data-scenario="budget">Budget</button>
+              <button class="sim-button" type="button" data-scenario="safety">Safety</button>
+            </div>
+            <div class="leaderboard" id="leaderboard" aria-live="polite"></div>
+            <div class="sim-output" id="sim-output">
+              Prompt profile: reasoning-heavy. Judge quality and instruction following carry the round.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="How LLMs Work">
+        <div class="slide-inner">
+          <p class="topline">Interactive Model View</p>
+          <h2>What happens inside an LLM response?</h2>
+          <div class="llm-lab">
+            <div class="token-tunnel" aria-hidden="true">
+              <span class="moving-token">prompt</span>
+              <span class="moving-token">tokens</span>
+              <span class="moving-token">attention</span>
+              <span class="moving-token">answer</span>
+            </div>
+            <div class="layer-stack">
+              <div class="layer"><b>Input</b><span>The prompt is split into tokens.</span></div>
+              <div class="layer"><b>Embedding</b><span>Tokens become mathematical vectors.</span></div>
+              <div class="layer"><b>Attention</b><span>The model weighs which words matter together.</span></div>
+              <div class="layer"><b>Layers</b><span>Many transformations refine the prediction.</span></div>
+              <div class="layer"><b>Output</b><span>The next token is chosen again and again.</span></div>
+            </div>
+            <div class="stage-buttons">
+              <button class="stage-button active" type="button" data-stage="tokens">Tokens</button>
+              <button class="stage-button" type="button" data-stage="attention">Attention</button>
+              <button class="stage-button" type="button" data-stage="closed">Closed Model</button>
+              <button class="stage-button" type="button" data-stage="open">Open Model</button>
+            </div>
+            <div class="stage-explain" id="stage-explain">
+              Tokens are the small pieces of text the model processes. OpenBench measures token usage because tokens become cost.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Open Closed Comparison">
+        <div class="slide-inner">
+          <p class="topline">Open vs Closed Models</p>
+          <h2>The tradeoff is not simple good vs bad.</h2>
+          <div class="compare-table">
+            <div class="compare-card open-side">
+              <h3>Open models</h3>
+              <ul>
+                <li>Weights or architecture may be available for inspection or deployment.</li>
+                <li>Support customization, local hosting, research, and independence.</li>
+                <li>Can reduce monopoly pressure by giving users alternatives.</li>
+                <li>May require more engineering work to deploy safely and efficiently.</li>
+              </ul>
+            </div>
+            <div class="compare-card closed-side">
+              <h3>Closed models</h3>
+              <ul>
+                <li>Usually accessed through hosted APIs controlled by the provider.</li>
+                <li>Often strong in reliability, tooling, moderation, and product polish.</li>
+                <li>Can concentrate pricing power, access control, and data dependence.</li>
+                <li>Harder to audit because internals and training details are limited.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Monopoly Map">
+        <div class="slide-inner split">
+          <div>
+            <p class="topline">Monopoly Pressure</p>
+            <h2>When one model ecosystem dominates, everyone builds around its rules.</h2>
+            <p class="lead">
+              The monopoly issue is not only who has the smartest model. It is
+              who controls the platform: APIs, prices, rate limits, safety
+              policies, developer tools, and access to frontier capability.
+            </p>
+          </div>
+          <div class="market-map" aria-label="AI market concentration diagram">
+            <span class="market-line"></span>
+            <span class="market-line"></span>
+            <span class="market-line"></span>
+            <span class="market-line"></span>
+            <div class="market-node closed">Closed frontier API</div>
+            <div class="market-node open">Open model labs</div>
+            <div class="market-node open">Researchers</div>
+            <div class="market-node open">Startups</div>
+            <div class="market-node open">Users</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Evaluation Axes">
+        <div class="slide-inner">
+          <p class="topline">How OpenBench Makes This Fair</p>
+          <h2>It compares models on dimensions monopoly marketing cannot hide.</h2>
+          <div class="axis">
+            <div class="axis-row"><b>Quality</b><span>Does the answer solve the task?</span><span>Reasoning, completeness, structure</span></div>
+            <div class="axis-row"><b>Trust</b><span>Can the user rely on it?</span><span>Hallucination risk, bias resistance, safety</span></div>
+            <div class="axis-row"><b>Access</b><span>Can users afford it?</span><span>Estimated cost, tokens, price sensitivity</span></div>
+            <div class="axis-row"><b>Performance</b><span>Can it work in a product?</span><span>Latency, throughput, streaming behavior</span></div>
+            <div class="axis-row"><b>Independence</b><span>Can users avoid lock-in?</span><span>Open alternatives can be compared against closed APIs</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Workflow">
+        <div class="slide-inner">
+          <p class="topline">User Workflow</p>
+          <h2>From question to recommendation in one run.</h2>
+          <div class="flow">
+            <div class="step"><b>1. Prompt</b><span>User enters a task or chooses a preset.</span></div>
+            <div class="step"><b>2. Stream</b><span>All configured models generate in parallel.</span></div>
+            <div class="step"><b>3. Measure</b><span>Latency, tokens, throughput, and cost are captured.</span></div>
+            <div class="step"><b>4. Judge</b><span>Outputs are anonymized and scored by rubric.</span></div>
+            <div class="step"><b>5. Decide</b><span>The app produces a leaderboard and decision brief.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Architecture">
+        <div class="slide-inner">
+          <p class="topline">Architecture</p>
+          <h2>Built as a real web system, not a static demo.</h2>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Frontend command center</h3>
+              <ul>
+                <li>Next.js App Router pages</li>
+                <li>React client dashboard with stateful runs</li>
+                <li>Recharts visualizations and animated UI states</li>
+                <li>Exportable report views for PDF and Word</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Backend benchmark layer</h3>
+              <ul>
+                <li>API routes for benchmark and evaluation</li>
+                <li>Provider adapters for OpenAI, Anthropic, DeepSeek, Mistral, Groq, and Together</li>
+                <li>Mock mode for reliable demos without API spend</li>
+                <li>Environment readiness checks for provider keys</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Streaming">
+        <div class="slide-inner split">
+          <div>
+            <p class="topline">Technical Highlight</p>
+            <h2>Server-Sent Events make the benchmark feel alive.</h2>
+            <p class="lead">
+              Instead of waiting for every model to finish, the app streams
+              start, token, complete, error, and done events to the browser.
+              That makes latency visible and lets users compare generation behavior in real time.
+            </p>
+          </div>
+          <div class="code-card">
+            POST /api/benchmark/stream<br />
+            <span class="accent">event:</span> start<br />
+            <span class="accent">event:</span> token<br />
+            <span class="accent">event:</span> complete<br />
+            <span class="accent">event:</span> error<br />
+            <span class="accent">event:</span> done<br /><br />
+            <span class="green">Parallel model streams</span><br />
+            <span class="yellow">Live tokens per second</span><br />
+            <span class="rose">Graceful provider failure handling</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Scoring">
+        <div class="slide-inner">
+          <p class="topline">Evaluation Method</p>
+          <h2>The judge scores what humans actually care about.</h2>
+          <div class="grid-3">
+            <div class="metric"><span class="small">Reasoning</span><strong>0-100</strong></div>
+            <div class="metric"><span class="small">Completeness</span><strong>0-100</strong></div>
+            <div class="metric"><span class="small">Structure</span><strong>0-100</strong></div>
+            <div class="metric"><span class="small">Low hallucination risk</span><strong>0-100</strong></div>
+            <div class="metric"><span class="small">Instruction following</span><strong>0-100</strong></div>
+            <div class="metric"><span class="small">Bias resistance</span><strong>0-100</strong></div>
+          </div>
+          <p class="lead">Model names are hidden during judging to reduce brand bias before the leaderboard is shown.</p>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Arena Score">
+        <div class="slide-inner split">
+          <div>
+            <p class="topline">Overall Ranking</p>
+            <h2>Arena score blends intelligence with practicality.</h2>
+            <p class="lead">
+              A model should not win only because it sounds good. OpenBench
+              combines judge quality with measured latency, cost, token
+              efficiency, safety, completeness, and instruction following.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Weighted signals</h3>
+            <ul>
+              <li>Quality: judge-normalized score</li>
+              <li>Reliability: low hallucination risk</li>
+              <li>Fairness: bias resistance</li>
+              <li>Execution: speed, cost, and token efficiency</li>
+              <li>Usefulness: completeness and instruction following</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="UI">
+        <div class="slide-inner">
+          <p class="topline">Product Design</p>
+          <h2>The interface is built for comparing, not just chatting.</h2>
+          <div class="grid-4">
+            <div class="card"><h3>Blind mode</h3><p class="small">Read responses before knowing which model wrote them.</p></div>
+            <div class="card"><h3>Matrix view</h3><p class="small">Compare scores, cost, latency, and token usage side by side.</p></div>
+            <div class="card"><h3>Charts</h3><p class="small">Visualize latency profile, token mix, cost curve, and radar scores.</p></div>
+            <div class="card"><h3>Decision brief</h3><p class="small">Translate raw results into the model choice a user should make.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Differentiation">
+        <div class="slide-inner">
+          <p class="topline">Why It Stands Out</p>
+          <h2>OpenBench goes beyond leaderboard culture.</h2>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Typical arena</h3>
+              <ul>
+                <li>Primarily public preference ranking</li>
+                <li>Limited view of cost and latency</li>
+                <li>Winner is often the main output</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>OpenBench AI</h3>
+              <ul>
+                <li>Prompt-specific deployment decision</li>
+                <li>Quality, safety, cost, speed, and efficiency together</li>
+                <li>Business-ready recommendation and exportable report</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Demo Script">
+        <div class="slide-inner">
+          <p class="topline">Live Demo Plan</p>
+          <h2>Three minutes that show the whole system.</h2>
+          <div class="grid-3">
+            <div class="card">
+              <h3>1. Run a trap prompt</h3>
+              <p class="small">Use the bat-and-ball prompt to show reasoning differences, not just fluent text.</p>
+            </div>
+            <div class="card">
+              <h3>2. Toggle blind mode</h3>
+              <p class="small">Ask the class which answer wins before revealing the model labels.</p>
+            </div>
+            <div class="card">
+              <h3>3. Show the brief</h3>
+              <p class="small">Explain why the best model, fastest model, and cheapest model may be different choices.</p>
+            </div>
+          </div>
+          <p class="lead">The punchline: the app does not ask "which model is famous?" It asks "which model should I use?"</p>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Roadmap">
+        <div class="slide-inner">
+          <p class="topline">What I Would Build Next</p>
+          <h2>From final project to research tool.</h2>
+          <div class="grid-2">
+            <div class="card">
+              <h3>Prompt suite mode</h3>
+              <p class="small">Run many prompts across the same model set and aggregate scores by task category.</p>
+            </div>
+            <div class="card">
+              <h3>Human vote mode</h3>
+              <p class="small">Let classmates vote on blind answers, then compare human preference against LLM judge scoring.</p>
+            </div>
+            <div class="card">
+              <h3>Routing recommendation</h3>
+              <p class="small">Choose a model automatically based on budget, latency ceiling, or safety requirement.</p>
+            </div>
+            <div class="card">
+              <h3>Dataset export</h3>
+              <p class="small">Save benchmark runs for repeatable experiments and semester-end analysis.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Closing">
+        <div class="slide-inner">
+          <p class="topline">Closing</p>
+          <h2>OpenBench AI turns LLM comparison into a decision system.</h2>
+          <p class="lead">
+            The project combines frontend design, backend API orchestration,
+            streaming infrastructure, evaluation methodology, and practical AI
+            product thinking into one working application.
+          </p>
+          <div class="pill-row">
+            <span class="pill">Live benchmark</span>
+            <span class="pill">Blind scoring</span>
+            <span class="pill">Safety-aware evaluation</span>
+            <span class="pill">Cost-aware recommendation</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="footer">
+      <span>OpenBench AI</span>
+      <span id="counter">1 / 13</span>
+    </div>
+    <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+    <script>
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      const counter = document.getElementById("counter");
+      const progressBar = document.getElementById("progress-bar");
+      let index = 0;
+
+      function showSlide(nextIndex) {
+        const previousIndex = index;
+        index = (nextIndex + slides.length) % slides.length;
+        slides.forEach((slide, slideIndex) => {
+          slide.classList.remove("exit-left", "exit-right");
+          if (slideIndex === previousIndex && slideIndex !== index) {
+            slide.classList.add(nextIndex > previousIndex ? "exit-left" : "exit-right");
+            setTimeout(() => slide.classList.remove("exit-left", "exit-right"), 260);
+          }
+          slide.classList.toggle("active", slideIndex === index);
+        });
+        counter.textContent = `${index + 1} / ${slides.length}`;
+        progressBar.style.width = `${((index + 1) / slides.length) * 100}%`;
+        const title = slides[index].dataset.title || "Slide";
+        document.title = `OpenBench AI - ${title}`;
+      }
+
+      document.getElementById("prev").addEventListener("click", () => showSlide(index - 1));
+      document.getElementById("next").addEventListener("click", () => showSlide(index + 1));
+
+      window.addEventListener("keydown", (event) => {
+        if (["ArrowRight", "PageDown", " "].includes(event.key)) {
+          event.preventDefault();
+          showSlide(index + 1);
+        }
+        if (["ArrowLeft", "PageUp", "Backspace"].includes(event.key)) {
+          event.preventDefault();
+          showSlide(index - 1);
+        }
+        if (event.key === "Home") showSlide(0);
+        if (event.key === "End") showSlide(slides.length - 1);
+      });
+
+      showSlide(0);
+
+      const scenarios = {
+        reasoning: {
+          note: "Prompt profile: reasoning-heavy. Judge quality and instruction following carry the round.",
+          scores: [
+            ["Claude", 94],
+            ["GPT-4o", 91],
+            ["DeepSeek", 84],
+            ["Mistral", 76]
+          ]
+        },
+        speed: {
+          note: "Prompt profile: real-time assistant. Latency and tokens per second become the deciding signals.",
+          scores: [
+            ["GPT-4o", 96],
+            ["Mistral", 87],
+            ["DeepSeek", 78],
+            ["Claude", 73]
+          ]
+        },
+        budget: {
+          note: "Prompt profile: high-volume workload. Estimated cost and token efficiency dominate the decision.",
+          scores: [
+            ["Mistral", 95],
+            ["DeepSeek", 89],
+            ["GPT-4o", 77],
+            ["Claude", 70]
+          ]
+        },
+        safety: {
+          note: "Prompt profile: sensitive advice. Low hallucination risk and bias resistance matter most.",
+          scores: [
+            ["Claude", 95],
+            ["GPT-4o", 88],
+            ["Mistral", 80],
+            ["DeepSeek", 75]
+          ]
+        }
+      };
+
+      const leaderboard = document.getElementById("leaderboard");
+      const simOutput = document.getElementById("sim-output");
+      const simButtons = Array.from(document.querySelectorAll(".sim-button"));
+
+      function renderScenario(name) {
+        const scenario = scenarios[name];
+        leaderboard.innerHTML = scenario.scores
+          .map(
+            ([label, score]) => `
+              <div class="leader-row">
+                <strong>${label}</strong>
+                <div class="leader-track"><span style="width: ${score}%"></span></div>
+                <span>${score}</span>
+              </div>
+            `
+          )
+          .join("");
+        simOutput.textContent = scenario.note;
+        simButtons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.scenario === name);
+        });
+      }
+
+      simButtons.forEach((button) => {
+        button.addEventListener("click", () => renderScenario(button.dataset.scenario));
+      });
+
+      renderScenario("reasoning");
+
+      const stageText = {
+        tokens:
+          "Tokens are the small pieces of text the model processes. OpenBench measures token usage because tokens become cost.",
+        attention:
+          "Attention is how the model decides which parts of the prompt relate to each other. This is why reasoning prompts can expose major differences between models.",
+        closed:
+          "Closed models hide most internals but provide strong hosted infrastructure. The user gets convenience, but also depends on one provider's pricing, rules, and access.",
+        open:
+          "Open models make the ecosystem more competitive. They can be inspected, customized, self-hosted, and compared directly against closed systems."
+      };
+      const stageExplain = document.getElementById("stage-explain");
+      const stageButtons = Array.from(document.querySelectorAll(".stage-button"));
+
+      stageButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const stage = button.dataset.stage;
+          stageExplain.textContent = stageText[stage];
+          stageButtons.forEach((item) => {
+            item.classList.toggle("active", item === button);
+          });
+        });
+      });
+
+      const canvas = document.getElementById("llm-bg");
+      const ctx = canvas.getContext("2d");
+      const particles = [];
+      const particleCount = 72;
+      let width = 0;
+      let height = 0;
+      let mouseX = 0;
+      let mouseY = 0;
+
+      function resizeCanvas() {
+        const ratio = window.devicePixelRatio || 1;
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = Math.floor(width * ratio);
+        canvas.height = Math.floor(height * ratio);
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      }
+
+      function createParticles() {
+        particles.length = 0;
+        for (let i = 0; i < particleCount; i += 1) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.42,
+            vy: (Math.random() - 0.5) * 0.42,
+            r: 1.4 + Math.random() * 2.2,
+            hue: Math.random() > 0.55 ? 188 : Math.random() > 0.5 ? 222 : 48
+          });
+        }
+      }
+
+      function drawNetwork() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.globalCompositeOperation = "lighter";
+
+        particles.forEach((p) => {
+          const dx = p.x - mouseX;
+          const dy = p.y - mouseY;
+          const distanceToMouse = Math.sqrt(dx * dx + dy * dy);
+          if (distanceToMouse < 180) {
+            p.vx += dx * 0.000018;
+            p.vy += dy * 0.000018;
+          }
+
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < -20) p.x = width + 20;
+          if (p.x > width + 20) p.x = -20;
+          if (p.y < -20) p.y = height + 20;
+          if (p.y > height + 20) p.y = -20;
+
+          ctx.beginPath();
+          ctx.fillStyle = `hsla(${p.hue}, 95%, 68%, 0.72)`;
+          ctx.shadowBlur = 18;
+          ctx.shadowColor = `hsla(${p.hue}, 95%, 68%, 0.55)`;
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        ctx.shadowBlur = 0;
+        for (let i = 0; i < particles.length; i += 1) {
+          for (let j = i + 1; j < particles.length; j += 1) {
+            const a = particles[i];
+            const b = particles[j];
+            const dx = a.x - b.x;
+            const dy = a.y - b.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 150) {
+              ctx.beginPath();
+              ctx.strokeStyle = `rgba(125, 211, 252, ${0.18 * (1 - distance / 150)})`;
+              ctx.lineWidth = 1;
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        requestAnimationFrame(drawNetwork);
+      }
+
+      window.addEventListener("resize", () => {
+        resizeCanvas();
+        createParticles();
+      });
+
+      window.addEventListener("pointermove", (event) => {
+        mouseX = event.clientX;
+        mouseY = event.clientY;
+      });
+
+      resizeCanvas();
+      createParticles();
+      drawNetwork();
+    </script>
+  </body>
+</html>
